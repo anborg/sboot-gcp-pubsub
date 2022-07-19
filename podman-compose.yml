@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  app:
+    image: localhost/myteam/sboot-gcp-pubsub
+    environment:
+      - CLOUDSDK_CONFIG=/gcp/config
+      - GOOGLE_APPLICATION_CREDENTIALS=/gcp/config/application_default_credentials.json
+    ports:
+      - '8080:8080'
+    volumes:
+      - $HOME/.config/gcloud:/gcp/config:ro

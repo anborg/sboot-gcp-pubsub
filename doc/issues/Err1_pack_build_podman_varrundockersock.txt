@@ -1,0 +1,13 @@
+ pack build hello
+
+af545fd2bf10: Already exists
+beb6d4a18e06: Download complete
+ERROR: failed to build: executing lifecycle: failed to create 'creator' container: Error response from daemon: container create: statfs /var/run/docker.sock: permission denied
+
+
+----
+Try soln 1:https://github.com/containers/podman/issues/13723
+
+Install podman-docker inside podman-machine-default
+
+podman machine ssh sudo rpm-ostree install podman-docker

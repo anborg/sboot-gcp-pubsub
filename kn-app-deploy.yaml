@@ -1,0 +1,51 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: kn-sboot-gcp-pubsub
+spec:
+  template:
+    metadata:
+      name: kn-sboot-gcp-pubsub-v1
+      annotations:
+        #make it 1 if you don't want coldstart
+        autoscaling.knative.dev/minScale: "o"
+        autoscaling.knative.dev/maxScale: "1"
+    spec:
+      volumes:
+        - name: bound-sa-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: openshift
+                  expirationSeconds: 3600
+                  path: token
+            defaultMode: 420
+        - name: gcp-credentialsrequest-credentials-vol
+          secret:
+            secretName: google-creds
+            defaultMode: 420
+      imagePullSecrets:
+        - name: denteam-image-repo-secret #{APPTEAM}-
+      containers:
+        - image: localhost/myteam/sboot-gcp-pubsub
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TARGET
+              value: "World-some-test-value"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/run/secrets/google/credentials_config.json
+            - name: http_proxy
+              value: 'http://myproxyserver'
+            - name: https_proxy
+              value: 'http://myproxyserver'
+            - name: no_proxy
+              value: >-
+                localhost,127.0.0.1,.svc,.local,.internal,.googleapis.com,mysubnets
+          volumeMounts:
+            - name: gcp-credentialsrequest-credentials-vol
+              readOnly: true
+              mountPath: /var/run/secrets/google
+            - name: bound-sa-token
+              readOnly: true
+              mountPath: /var/run/secrets/openshift/serviceaccount
